@@ -2,6 +2,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
+  // Middleware работает ТОЛЬКО для /admin/* роутов
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
+  
+  if (!isAdminRoute) {
+    // Публичные роуты пропускаем без проверки
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -71,11 +79,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * Match only /admin/* routes
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/admin/:path*',
   ],
 }
